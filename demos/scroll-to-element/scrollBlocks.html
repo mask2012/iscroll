@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+
+<title>iScroll demo: scroll to element</title>
+
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script type="text/javascript" src="../../build/iscroll.js"></script>
+
+<script type="text/javascript">
+
+var myScroll,
+	endPosY=0,
+	heights=[],
+	blockNum,
+	page=0,
+	viewportHeight=$(window).height();
+
+document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+
+$(window).load(function(){
+	myScroll = new IScroll('#wrapper', {
+		mouseWheel: true,
+		click: true,
+		momentum: false,     //释放后页面继续滑动
+		deceleration:0.002   //如果滑动true，滑动的时间，值越大，停止得越快
+		// snap: true
+	});
+	myScroll.on('scrollEnd', scrollEnd);
+	getHeights();
+});
+
+function scrollEnd(){
+	var transform=$('#scroller').css('transform');
+	var newEndPosY=getValue(transform);
+	var yDirection;1
+	var bFound;
+	if(newEndPosY-endPosY<0){   //往下滚动
+		bFound=false;
+		
+
+		for (var i = 0; i < blockNum-1; i++) {
+			if( Math.abs(newEndPosY) > (heights[i]-viewportHeight) && !bFound && page==i ){
+				myScroll.scrollTo(0, -heights[i],1300);
+				page+=1;
+				bFound=true;
+			}
+		}
+	}else{   //往上滚动
+		console.log(Math.abs(newEndPosY));
+		console.log(heights[0]-viewportHeight);
+
+		// if( Math.abs(newEndPosY) < (heights[1]) && !bFound && page==2 ){
+		// 	myScroll.scrollTo(0, -heights[0],1300);
+		// 	page-=1;
+		// 	bFound=true;
+		// }
+
+
+		for (var i = 0; i < blockNum; i++) {
+			if( Math.abs(newEndPosY) < (heights[i]) && !bFound && page==(i+1) ){
+				if(i==0){
+					v=0;
+				}else{
+					v=heights[i-1];
+				}
+				myScroll.scrollTo(0, -v,1300);
+				page-=1;
+				bFound=true;
+			}
+		}
+	}
+	endPosY=newEndPosY;
+}
+
+//取得height数组
+function getHeights(){
+	blockNum=$('#scroller .blocks>div').length;
+	for (var i = 0; i < blockNum; i++) {
+		var h=$('#scroller .blocks>div').eq(i).offset().top+$('#scroller .blocks>div').eq(i).height();
+		heights[i]=h;
+	}
+	console.log(heights)
+}
+
+
+//取得transform的y值
+function getValue(str){
+	var startIndex = str.indexOf("(")+1;
+	var endIndex = str.indexOf(")");
+	var diff = endIndex - startIndex;
+	var strs = str.substr(startIndex,diff).split(",");
+	return strs[strs.length-1]/1;
+}
+
+
+</script>
+
+<style type="text/css">
+#wrapper {
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background: #ccc;
+	overflow: hidden;
+}
+	.block1{background-color: #555; height: 400px;}
+	.block2{background-color: #f00; height: 1200px;}
+	.block3{background-color: #ccc; height: 600px;}
+	.block4{background-color: #e88; height: 700px;}
+	.block5{background-color: #d38; height: 800px;}
+	.blocks>div{line-height: 9; text-align: center;}
+</style>
+</head>
+<body>
+
+<div id="wrapper">
+	<div id="scroller">
+		<div class="blocks">
+			<div class="block1">a<br>a<br>a</div>
+			<div class="block2">b<br>b<br>b<br>b<br>b<br>b<br>b<br>b<br></div>
+			<div class="block3">c<br>c<br>c<br>c</div>
+			<div class="block4">d<br>d<br>d<br>d<br></div>
+			<div class="block5">e<br>e<br>e<br>e<br>e<br></div>
+		</div>
+	</div>
+</div>
+
+</body>
+</html>
